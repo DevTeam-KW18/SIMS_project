@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BoardMapper">
+
+ <!-- for insert -->
+   <insert id="insert">
+	   INSERT INTO BOARD(
+	   					       TITLE 
+	   					      , CONTENT 
+	   					      , WRITER
+	   					      , UNIVERSITY
+	   					      , ID
+	   					   
+	   					        )
+	                 VALUES(                   			  
+	                 		 #{title}
+	                 		  , #{content}
+	                 		  , #{writer}
+	                 		  , #{university}
+	                 		  , #{id}
+	                 
+	                 		      )
+   
+   </insert>
+    <!-- for list -->
+   <select id="list" resultType="kw18.team.vo.BoardVO">
+		SELECT   BNO
+			   , TITLE
+			   , WRITER
+			   , REGDATE
+			   , ID
+		  FROM BOARD
+		  ORDER BY BNO DESC
+	</select>
+	 <!-- for read -->
+	<select id="read" parameterType="kw18.team.vo.BoardVO" resultType="kw18.team.vo.BoardVO">
+		SELECT	BNO
+			  , TITLE
+			  , CONTENT
+			  , WRITER
+			  , REGDATE
+			  , HIT
+	   		  , LIKES
+	   		  , ID
+		 FROM BOARD
+		 WHERE BNO = #{bno} AND UNIVERSITY = #{university}
+	</select>
+	 <!-- for update -->
+	 <update id="update" parameterType="kw18.team.vo.BoardVO">
+		UPDATE BOARD
+		   SET TITLE    =   #{title},
+		   	   CONTENT  =   #{content}
+		 WHERE BNO = #{bno} AND UNIVERSITY = #{university}
+	</update>
+	 <!-- for delete -->
+	<delete id="delete" parameterType="kw18.team.vo.BoardVO">
+		DELETE 
+		  FROM BOARD
+		 WHERE BNO=#{bno}
+	</delete>
+	 <!-- for listpage -->
+	<select id="listPage" resultType="kw18.team.vo.BoardVO" parameterType="kw18.team.vo.Count">
+		SELECT  BNO, 
+		        TITLE, 
+		        CONTENT,
+		        WRITER, 
+		        REGDATE,
+		        HIT,
+	   		    ID
+		 FROM ( 
+		        SELECT BNO, 
+		               TITLE, 
+		               CONTENT, 
+		               WRITER, 
+		               REGDATE,
+		               HIT, 
+	   		   			ID,
+		               ROW_NUMBER() OVER(ORDER BY BNO DESC) AS RNUM
+		         FROM BOARD
+		                       ) MP
+		WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+
+	</select>
+  <!-- for listcount -->  
+   <select id="listCount" resultType="int">
+	<![CDATA[
+		SELECT COUNT(BNO)
+		  FROM BOARD
+		 WHERE BNO > 0
+	]]>
+	</select>
+
+ <!-- for HIT -->
+	<update id="boardHit" parameterType="kw18.team.vo.BoardVO">
+    	UPDATE BOARD SET
+    	HIT = HIT+1
+    	WHERE BNO = #{bno} AND UNIVERSITY = #{university}
+    </update>
+    
+    <!-- for like -->
+	<update id="like" parameterType="kw18.team.vo.BoardVO">
+    	UPDATE BOARD SET
+    	LIKES = LIKES+1
+    	WHERE BNO = #{bno} AND UNIVERSITY = #{university}
+    </update>
+    
+    <!-- for hot list -->
+   <select id="hot" resultType="kw18.team.vo.BoardVO" parameterType="String">
+		SELECT   BNO
+			   , TITLE
+			   , WRITER
+			   , REGDATE
+			   , ID
+			   , LIKES
+			   , HIT
+		  FROM BOARD
+		  WHERE UNIVERSITY = #{university}
+		  ORDER BY LIKES
+		  DESC LIMIT 5
+	</select>
+    
+    
+	
+	   
+</mapper>

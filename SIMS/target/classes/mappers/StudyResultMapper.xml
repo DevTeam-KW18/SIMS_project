@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="StudyResultMapper">
+	
+	<select id = "get_gradeData" resultType="kw18.team.vo.GradeVO">
+		SELECT 	g.COURSE_NUMBER, g.STUDENT_ID, g.UNIVERSITY, GRADE, SEMESTER, e.COURSE_NAME, c.COURSE_INFO, c.CREDIT, c.PROFESSOR
+		FROM	REGISTRATION e
+			INNER JOIN GRADE g
+				ON e.STUDENT_ID = g.STUDENT_ID
+					and e.COURSE_NUMBER = g.COURSE_NUMBER
+						and e.UNIVERSITY = g.UNIVERSITY
+			INNER JOIN COURSE c
+				ON g.COURSE_NUMBER = c.COURSE_NUMBER
+		WHERE	g.STUDENT_ID = #{student_id}
+		AND		g.UNIVERSITY = #{university}
+		ORDER BY e.SEMESTER DESC;
+	</select>
+	
+	<select id = "get_avggrade" resultType="double">
+		SELECT 	(SUM(CASE g.grade
+			WHEN 'A+' THEN 4.5*c.credit
+			WHEN 'A0' THEN 4.0*c.credit
+            WHEN 'B+' THEN 3.5*c.credit
+            WHEN 'B0' THEN 3.0*c.credit
+            WHEN 'C+' THEN 2.5*c.credit
+            WHEN 'C0' THEN 2.0*c.credit
+            WHEN 'D+' THEN 1.5*c.credit
+            WHEN 'D0' THEN 1.0*c.credit
+			WHEN 'NP' THEN 0
+			END)/
+            SUM(CASE g.grade WHEN 'P' THEN 0 
+							ELSE c.credit END)) as temp
+		FROM	REGISTRATION e
+			INNER JOIN GRADE g
+				ON e.STUDENT_ID = g.STUDENT_ID
+					and e.COURSE_NUMBER = g.COURSE_NUMBER
+						and e.UNIVERSITY = g.UNIVERSITY
+			INNER JOIN COURSE c
+				ON g.COURSE_NUMBER = c.COURSE_NUMBER
+		WHERE	g.STUDENT_ID = #{student_id}
+		AND		g.UNIVERSITY = #{university}
+		ORDER BY e.SEMESTER DESC;
+	</select>
+	
+	<select id = "get_sumcredit" resultType="double">
+		SELECT 	(SUM(CASE g.grade WHEN 'P' THEN 0 
+							ELSE c.credit END)) as temp
+		FROM	REGISTRATION e
+			INNER JOIN GRADE g
+				ON e.STUDENT_ID = g.STUDENT_ID
+					and e.COURSE_NUMBER = g.COURSE_NUMBER
+						and e.UNIVERSITY = g.UNIVERSITY
+			INNER JOIN COURSE c
+				ON g.COURSE_NUMBER = c.COURSE_NUMBER
+		WHERE	g.STUDENT_ID = '2018202001'
+		AND		g.UNIVERSITY = '광운대학교'
+		ORDER BY e.SEMESTER DESC;
+	</select>
+	
+	
+	<select id = "get_sumgrade" resultType="double">
+		SELECT 	SUM(CASE g.grade
+				WHEN 'A+' THEN 4.5*c.credit
+				WHEN 'A0' THEN 4.0*c.credit
+	            WHEN 'B+' THEN 3.5*c.credit
+	            WHEN 'B0' THEN 3.0*c.credit
+	            WHEN 'C+' THEN 2.5*c.credit
+	            WHEN 'C0' THEN 2.0*c.credit
+	            WHEN 'D+' THEN 1.5*c.credit
+	            WHEN 'D0' THEN 1.0*c.credit
+				WHEN 'NP' THEN 0
+				END) as SUMGRADE
+			FROM	REGISTRATION e
+				INNER JOIN GRADE g
+					ON e.STUDENT_ID = g.STUDENT_ID
+						and e.COURSE_NUMBER = g.COURSE_NUMBER
+							and e.UNIVERSITY = g.UNIVERSITY
+				INNER JOIN COURSE c
+					ON g.COURSE_NUMBER = c.COURSE_NUMBER
+			WHERE	g.STUDENT_ID = '2018202001'
+			AND		g.UNIVERSITY = '광운대학교'
+			ORDER BY e.SEMESTER DESC;
+	</select>
+</mapper>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RegistrationMapper">
+   <!-- 게시판 글 작성 -->
+   <insert id="enroll" parameterType="map">
+   INSERT INTO REGISTRATION(COURSE_NAME,
+						   UNIVERSITY,
+						   COURSE_NUMBER,
+						   STUDENT_ID
+						   )
+						   VALUES(
+						   #{course_name},
+						   #{university},
+						   #{course_number},
+						   #{student_id}
+						   )
+   </insert>
+   <select id="selectCourseInfo" parameterType="String" resultType="kw18.team.vo.TimetableVO">
+   				SELECT
+							COURSE_NAME,
+							UNIVERSITY,
+							COURSE_NUMBER
+				FROM COURSE
+				WHERE COURSE_NUMBER=#{course_number}
+   </select>
+   
+  
+   <select id="enrollValidate" parameterType="map"  resultType="int">
+   SELECT COUNT(*)
+   FROM REGISTRATION
+   WHERE COURSE_NUMBER=#{course_number} AND STUDENT_ID=#{id}
+   </select>
+   
+   
+   <select id="course_get"  parameterType="String" resultType="kw18.team.vo.TimetableVO">
+		SELECT  
+		 COURSE_NAME,
+		 CREDIT,
+		 UNIVERSITY,
+		 PROFESSOR, 
+	   	 MAJOR,
+	   	 COURSE_ROOM,
+	   	 COURSE_YEAR,
+	   	 NUM_OF_STUDENT,
+	   	 CTIME		
+		FROM COURSE
+		WHERE COURSE_NUMBER=#{course_number}
+	</select>
+	
+ <select id="reviewlist" parameterType="map" resultType="kw18.team.vo.CourseReviewVO">
+  SELECT COURSE_NUMBER
+	   	, SEMESTER
+	   	, STAR_POINT
+	   	, COURSE_REVIEW
+	     ,PROFESSOR
+	   	,COURSE_NAME
+  FROM REVIEW
+  WHERE COURSE_NAME=#{course_name} AND PROFESSOR=#{professor}
+  </select>
+  
+  
+  <select id="avgStar" parameterType="map" resultType="int">
+  SELECT AVG(STAR_POINT)
+  FROM REVIEW
+  WHERE COURSE_NAME=#{course_name} AND PROFESSOR=#{professor}
+  </select>
+  
+
+  
+	<sql id="search">
+	<if test="searchType !=null">
+		<if test="searchType=='name'.toString()"> AND COURSE_NAME LIKE CONCAT('%',#{keyword},'%')</if>
+		<if test="searchType=='num'.toString()"> AND COURSE_NUMBER LIKE CONCAT('%',#{keyword},'%')</if>
+		<if test="searchType=='professor'.toString()"> AND PROFESSOR LIKE CONCAT('%',#{keyword},'%')</if>
+		<if test="searchType=='major'.toString()"> AND MAJOR LIKE CONCAT('%',#{keyword},'%')</if>
+		<if test="searchType=='uni'.toString()"> AND UNIVERSITY LIKE CONCAT('%',#{keyword},'%')</if>
+		<if test="searchType=='credit'.toString()"> AND CREDIT LIKE CONCAT('%',#{keyword},'%')</if>
+		<if test="searchType=='all'.toString()">AND COURSE_NAME LIKE CONCAT('%',#{keyword},'%')
+												OR COURSE_NUMBER LIKE CONCAT('%',#{keyword},'%')
+												OR PROFESSOR LIKE CONCAT('%',#{keyword},'%')
+												OR MAJOR LIKE CONCAT('%',#{keyword},'%')
+												OR UNIVERSITY LIKE CONCAT('%',#{keyword},'%')
+												OR CREDIT LIKE CONCAT('%',#{keyword},'%')</if>	
+	</if>
+</sql>
+  <!-- for listcount -->  
+   <select id="listCount" resultType="int" parameterType="kw18.team.vo.Search">
+		SELECT COUNT(COURSE_NUMBER)
+		FROM COURSE
+		WHERE 1=1
+		<include refid="search"></include>
+	</select>
+	
+  <select id="listPage" resultType="kw18.team.vo.TimetableVO" parameterType="kw18.team.vo.Search">
+		SELECT   COURSE_NAME, 
+				 COURSE_NUMBER, 
+				 CREDIT,
+				 UNIVERSITY,
+				 PROFESSOR, 
+			   	 MAJOR
+		 FROM ( 
+		        SELECT   COURSE_NAME, 
+						 COURSE_NUMBER, 
+						 CREDIT,
+						 UNIVERSITY,
+						 PROFESSOR, 
+					   	 MAJOR,
+		                ROW_NUMBER() OVER(ORDER BY COURSE_NUMBER ASC) AS RNUM
+		         FROM COURSE
+		    	 WHERE 1=1
+		         <include refid="search"></include>
+		                       ) MP
+		WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd}
+	</select>
+	
+</mapper>

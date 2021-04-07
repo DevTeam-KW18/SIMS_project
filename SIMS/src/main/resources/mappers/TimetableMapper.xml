@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TimetableMapper">
+	
+	<select id="course_get"  resultType="kw18.team.vo.TimetableVO" parameterType="hashMap">
+	
+		SELECT R.COURSE_NUMBER, R.STUDENT_ID, R.UNIVERSITY, GRADE, SEMESTER, 
+		R.COURSE_NAME, 
+		(SELECT PROFESSOR FROM COURSE C WHERE C.COURSE_NUMBER=R.COURSE_NUMBER) AS PROFESSOR,
+        (SELECT CREDIT FROM COURSE C WHERE C.COURSE_NUMBER=R.COURSE_NUMBER) AS CREDIT,
+        (SELECT CTIME FROM COURSE C WHERE C.COURSE_NUMBER=R.COURSE_NUMBER) AS CTIME
+        FROM REGISTRATION R LEFT JOIN GRADE G
+        ON R.UNIVERSITY= #{university}
+		AND R.COURSE_NUMBER= G.COURSE_NUMBER
+		WHERE G.GRADE IS NULL and R.STUDENT_ID= #{student_id}
+		
+	</select>
+	
+	<delete id="course_delete" parameterType="hashMap">
+		DELETE 
+		  FROM REGISTRATION
+		 WHERE STUDENT_ID= #{student_id} AND COURSE_NAME=#{course_name} AND UNIVERSITY='광운대학교'
+	</delete>
+	
+	<select id="major"  resultType="kw18.team.vo.TimetableVO" parameterType="kw18.team.vo.StudentVO">
+	
+		select course.*
+      from course
+      where university = #{university} and
+      course_name not in (select course_name
+                     from registration
+                     where student_id = #{student_id}) and
+      course_name in (select postal_subject
+                        from curriculum
+                              where curriculum.course_name in (select course_name
+                                                   from course
+                                                                    where course_number in (select course_number
+                                                                     from grade
+                                                                     where student_id = #{student_id})))
+		
+	</select>
+	
+	<select id="elective"  resultType="kw18.team.vo.TimetableVO" parameterType="kw18.team.vo.StudentVO">
+	
+		select r.course_name, c.credit, r.course_number, r.professor
+		from review r left outer join course c
+		on r.course_number = c.course_number
+		where c.course_info like '교%' and
+		c. university = #{university} and
+		c.course_name not in (select course_name
+				      from registration
+				        where student_id = #{student_id})
+		group by r.course_name, c.credit, r.course_number, r.professor
+		order by avg(r.star_point) desc limit 5;
+		
+	</select>
+	
+	<select id="star_point"  resultType="int" parameterType="kw18.team.vo.StudentVO">
+		
+		select avg(r.star_point)
+		from review r left outer join course c
+		on r.course_number = c.course_number
+		where c.course_info like '교%' and
+		c. university = #{university} and
+		c.course_name not in (select course_name
+				      from registration
+				        where student_id = #{student_id})
+		group by r.course_name, c.credit
+		order by avg(r.star_point) desc limit 5;
+		
+	</select>
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="GradingMapper">
+<insert id="grading">
+INSERT INTO GRADE(COURSE_NUMBER,STUDENT_ID,UNIVERSITY,GRADE)
+ VALUES(#{course_number},#{student_id},#{university},#{grade})
+</insert>
+ <select id="list" resultType="kw18.team.vo.GradingVO" parameterType="String">
+  SELECT DISTINCT*
+  FROM REGISTRATION LEFT OUTER JOIN GRADE USING(COURSE_NUMBER,UNIVERSITY,STUDENT_ID)
+  WHERE STUDENT_ID=#{student_id}
+  </select>
+  
+  <select id="Check" parameterType="String" resultType="int">
+  SELECT COUNT(*)
+  FROM GRADE
+  WHERE COURSE_NUMBER=#{course_number}
+  </select>
+  
+  <update id="updateGrade" parameterType="map">
+  UPDATE GRADE
+  SET GRADE=#{grade}
+  WHERE COURSE_NUMBER=#{course_number}
+  </update>
+</mapper>

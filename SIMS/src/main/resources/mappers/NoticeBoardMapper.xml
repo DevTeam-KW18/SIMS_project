@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="NoticeBoardMapper">
+
+ <!-- for insert -->
+   <insert id="insert">
+	   INSERT INTO NOTICE_BOARD(
+	   					       TITLE 
+	   					      , CONTENT 
+	   					      , WRITER
+	   					   	  , UNIVERSITY
+	   					   	  , COURSE_NUMBER
+	   					   	  , COURSE_NAME
+	   					   	  , PROFESSOR_NAME
+	   					        )
+	                 VALUES(                   			  
+	                 		 #{title}
+	                 		  , #{content}
+	                 		  , #{writer}
+	                 		  , #{university}
+	                 		  , #{course_number}
+	                 		  , #{course_name}
+	                 		  , #{professor_name}
+	                 		      )
+   
+   </insert>
+    <!-- for list -->
+
+	 <!-- for read -->
+	<select id="read" parameterType="int" resultType="kw18.team.vo.NoticeBoardVO">
+		SELECT	BNO
+			  , TITLE
+			  , CONTENT
+			  , WRITER
+			  , REGDATE
+			  , HIT
+			  , COURSE_NUMBER
+			  , COURSE_NAME
+			  , PROFESSOR_NAME
+		 FROM NOTICE_BOARD
+		 WHERE BNO = #{bno}
+	</select>
+	 <!-- for update -->
+	 <update id="update" parameterType="kw18.team.vo.NoticeBoardVO">
+		UPDATE NOTICE_BOARD
+		   SET TITLE    =   #{title},
+		   	   CONTENT  =   #{content}
+		 WHERE BNO = #{bno} 
+	</update>
+	 <!-- for delete -->
+	<delete id="delete" parameterType="int">
+		DELETE 
+		  FROM NOTICE_BOARD
+		 WHERE BNO=#{bno}
+	</delete>
+	 <!-- for listpage -->
+	<select id="listPage" resultType="kw18.team.vo.NoticeBoardVO" parameterType="kw18.team.vo.Count">
+		SELECT  BNO, 
+		        TITLE, 
+		        CONTENT,
+		        WRITER, 
+		        REGDATE,
+		        HIT,
+		        COURSE_NUMBER,
+		        PROFESSOR_NAME
+		        
+		 FROM ( 
+		        SELECT BNO, 
+		               TITLE, 
+		               CONTENT, 
+		               WRITER, 
+		               REGDATE,
+		               HIT, 
+		               COURSE_NUMBER,
+		               PROFESSOR_NAME,
+		               ROW_NUMBER() OVER(ORDER BY BNO DESC) AS RNUM
+		         FROM NOTICE_BOARD
+		                       ) MP
+		WHERE RNUM BETWEEN #{rowStart} AND #{rowEnd} 
+
+	</select>
+  <!-- for listcount -->  
+   <select id="listCount" resultType="int" parameterType="String">
+	<![CDATA[
+		SELECT COUNT(BNO)
+		  FROM NOTICE_BOARD
+		 WHERE BNO > 0 AND COURSE_NUMBER=#{course_number}
+	]]>
+	</select>
+
+
+ <!-- for HIT -->
+	<update id="boardHit" parameterType="int">
+    	UPDATE NOTICE_BOARD SET
+    	HIT = HIT+1
+    	WHERE BNO = #{bno}
+    </update>
+		   	   
+	<select id="current_course_listPage" resultType="kw18.team.vo.TimetableVO" parameterType="hashMap" >	
+		SELECT R.COURSE_NUMBER, R.STUDENT_ID, R.UNIVERSITY, GRADE, SEMESTER, 
+		R.COURSE_NAME,
+		(SELECT PROFESSOR FROM COURSE C WHERE C.COURSE_NUMBER=R.COURSE_NUMBER) AS PROFESSOR,
+        (SELECT CREDIT FROM COURSE C WHERE C.COURSE_NUMBER=R.COURSE_NUMBER) AS CREDIT
+        FROM REGISTRATION R LEFT JOIN GRADE G
+        ON R.UNIVERSITY= #{university}
+		AND R.COURSE_NUMBER= G.COURSE_NUMBER
+		where G.GRADE IS NULL and R.STUDENT_ID= #{student_id} 
+
+	</select>  
+	
+	<select id="current_course_listPage_pro" resultType="kw18.team.vo.TimetableVO" parameterType="hashMap" >	
+	select distinct C.course_number, C.professor, C.credit, C.ctime, C.course_name , C.university
+ 	from course as C join professor as P on C.professor=P.name
+	where  P.name=#{name} and C.university=#{university}
+	</select> 
+	
+	<select id="latest" resultType="kw18.team.vo.NoticeBoardVO" parameterType="hashMap" >	
+		select * from notice_board as t
+			where t.bno in (
+			 select max(bno) from (select * from notice_board as k order by k.bno desc) as n
+			      where n.university = #{university}
+			      and n.course_number in (SELECT R.COURSE_NUMBER
+			        FROM REGISTRATION R LEFT JOIN GRADE G
+			        ON R.UNIVERSITY= #{university}
+			      AND R.COURSE_NUMBER= G.COURSE_NUMBER
+			      where G.GRADE IS NULL and R.STUDENT_ID= #{student_id})
+				group by n.course_number);
+		
+	</select>  
+
+	<select id="latest_pro" resultType="kw18.team.vo.NoticeBoardVO" parameterType="hashMap" >	
+		select * from notice_board as t
+			where t.bno in (
+			 select max(bno) from (select * from notice_board as k order by k.bno desc) as n
+			      where n.university = #{university}
+			      and n.course_number in (select C.course_number
+			      from course as C join professor as P on C.professor=P.name
+					where  P.name=#{name} and C.university=#{university})
+				group by n.course_number);
+
+	</select>  
+	   
+</mapper>
