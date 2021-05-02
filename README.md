@@ -70,7 +70,7 @@
 
 
 ### 📕 실행 동영상 링크
-	https://youtu.be/dalb1Of5dxc 
+	https://youtu.be/dalb1Of5dxc
 
 ### 📘 Members
 | 김영은 | 김현아 | 문지은 | 이화경 |
