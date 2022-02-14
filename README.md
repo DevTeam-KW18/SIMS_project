@@ -60,9 +60,15 @@
 <br>
 
 ### 📙 사용된 도구
-
-* [Spring]
-* [MySql]
+* IDE. 	     [Eclipse]
+* Framework. [Spring]
+* ORM.       [MyBatis]
+* RDMBMS.    [MySQL]
+* Engine.    [JSP]
+* Language.  [JAVA]
+ 	     [JAVAScript]
+	     [HTML]
+	     [CSS]
 <br>
 
 ### 📗 ERD
