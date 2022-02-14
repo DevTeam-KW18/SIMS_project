@@ -64,11 +64,11 @@
 * Framework. [Spring]
 * ORM.       [MyBatis]
 * RDMBMS.    [MySQL]
-* Engine.    [JSP]
 * Language.  [JAVA]
  	     [JAVAScript]
 	     [HTML]
 	     [CSS]
+	     [JSP]
 <br>
 
 ### 📗 ERD
