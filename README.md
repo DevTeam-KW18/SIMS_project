@@ -72,7 +72,7 @@
 <br>
 
 ### 📗 ERD
-<img width="562" alt="캡처" src="https://user-images.githubusercontent.com/55692557/102691151-cfbb3680-424d-11eb-8b1e-8bcbefca3d68.PNG">
+<img width="600" alt="캡처" src="https://user-images.githubusercontent.com/56907015/154015170-b4c654be-2f95-4241-aeb7-3a2b60b29137.png">
 
 
 ### 📕 실행 동영상 링크
